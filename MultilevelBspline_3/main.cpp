@@ -58,7 +58,7 @@ vector <float> xs, ys;
 
 MatrixXf x5, y5, z5, pz2, z5_loca;
 
-float zp[32000];
+float zp[580000];
 
 float XUP[3] = { 1, 0, 0 }, XUN[3] = { -1, 0, 0 },
 YUP[3] = { 0, 1, 0 }, YUN[3] = { 0, -1, 0 },
@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
 
 	sn = points_1.size();
 
+	cout << sn << endl;
 	minx = 100;
 	miny = 100;
 	minz = 0;
@@ -119,10 +120,9 @@ int main(int argc, char* argv[])
 	}
 
 	minz = minz / sn;
-	minz = 0;
 	im = minx * d1 - 4;
 	in = miny * d1 - 4;
-
+	minz = 0.5;
 	maxx = 0.002;
 	maxy = 0.002;
 
@@ -139,8 +139,8 @@ int main(int argc, char* argv[])
 	}
 
 
-	m = maxx * d1 + 1;
-	n = maxy * d1 + 1;
+	m = maxx * d1 + 4;
+	n = maxy * d1 + 4;
 
 	n1 = (float)n / (float)d1;  // y range
 	m1 = (float)m / (float)d1;  // x range 
@@ -154,6 +154,7 @@ int main(int argc, char* argv[])
 	MatrixXf wkl1(n + 3, m + 3);
 	MatrixXf wklt(n + 3, m + 3);
 	wklt.setZero();
+
 
 
 	for (i = 0; i < sn; i = i + 1)
@@ -179,8 +180,11 @@ int main(int argc, char* argv[])
 	// ----------------------------------------------------------------------------------------------- 
 	//  control lattice  반복 구문
 
+
+
 	while (1)
 	{
+
 
 		MatrixXf pz1_1(2 * n + 3, 2 * m + 3);
 		refine(pz1, pz1_1);
@@ -188,6 +192,7 @@ int main(int argc, char* argv[])
 		for (i = 0; i < sn; i = i + 1)
 		{
 			zp[i] = points_1.at(i).zpos - diff(points_1.at(i).xpos, points_1.at(i).ypos, pz1, d1);
+
 		}
 
 		lo1.resize(2 * n + 3, 2 * m + 3);
@@ -198,6 +203,7 @@ int main(int argc, char* argv[])
 		wklt.resize(2 * n + 3, 2 * m + 3);
 		wklt.setZero();
 
+
 		for (i = 0; i < sn; i = i + 1)
 		{
 			wkl1 = controlsetwkl(points_1.at(i).xpos, points_1.at(i).ypos, zp[i], 2 * n, 2 * m, 2 * d1);
@@ -206,6 +212,7 @@ int main(int argc, char* argv[])
 			lo1 = controlsetlo(points_1.at(i).xpos, points_1.at(i).ypos, zp[i], 2 * n, 2 * m, 2 * d1);
 			lot = lo1 + lot;
 		}
+
 
 		pz1.resize(2 * n + 3, 2 * m + 3);
 		pz1.setZero();
@@ -239,6 +246,8 @@ int main(int argc, char* argv[])
 		latticen = latticen + 1;
 
 	}
+
+
 
 	cout << "Lattice number  = " << latticen << endl;
 
@@ -286,7 +295,7 @@ int main(int argc, char* argv[])
 	{
 		for (oo = 0; oo < xs.size(); oo = oo + 1)
 		{
-			if (z5(pp, oo) > 0.1)
+			if (z5(pp, oo) > minz)
 			{
 				l1.push_back({ x5(pp, oo), y5(pp, oo), z5(pp, oo) });
 				z5_loca(pp, oo) = numbering;
@@ -412,7 +421,7 @@ void display()
 			{
 
 
-				if (z5(pp, oo)> 0.1)
+				if (z5(pp, oo)> minz+0.1)
 				{
 					glBegin(GL_POLYGON);
 					glNormal3f((y5(pp + 1, oo + 1) - y5(pp, oo)) * (z5(pp + 1, oo) - z5(pp, oo)) - (z5(pp + 1, oo + 1) - z5(pp, oo)) * (y5(pp + 1, oo) - y5(pp, oo)),
@@ -426,7 +435,7 @@ void display()
 				}
 
 
-				if (z5(pp, oo)> 0.1)
+				if (z5(pp, oo)> minz+0.1)
 				{
 
 					glBegin(GL_POLYGON);
@@ -462,7 +471,7 @@ void SetupRC()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-1, 4, -1, 4, -4.0, 12.0);
+	glOrtho(-1, 4, -1, 4, -10.0, 12.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
